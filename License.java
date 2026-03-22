@@ -61,3 +61,72 @@ public class License extends Item {
     public LocalDate getStart() { return start; }
     public LocalDate getEnd() { return end; }
 }
+
+LATEST CODE
+    package com.cinco;
+
+import com.google.gson.annotations.SerializedName;
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import java.time.LocalDate;
+
+/*
+ * A simplified constructor used during initial data loading that passes default null values for 
+ * dates to the primary constructor.
+ */
+@XStreamAlias("linkedhashmap")
+public class License extends Item {
+    
+    @SerializedName("fee")
+    private final String serviceFee;
+    
+    @SerializedName("annualFee")
+    private final String annualFee;
+
+    @XStreamOmitField
+    private transient final LocalDate start;
+    
+    @XStreamOmitField
+    private transient final LocalDate end;
+
+    // 1. The "Full" constructor for DataConverter/Invoices
+    public License(String uuid, String name, double serviceFee, double annualFee, LocalDate start, LocalDate end) {
+        super(uuid, name, "L");
+        this.serviceFee = String.format("%.1f", serviceFee);
+        this.annualFee = String.format("%.1f", annualFee);
+        this.start = start;
+        this.end = end;
+    }
+
+    /*
+     * A simplified constructor used during initial data loading that passes default null values for 
+     * dates to the primary constructor.
+     */
+    public License(String uuid, String name, double serviceFee, double annualFee) {
+        this(uuid, name, serviceFee, annualFee, null, null);
+    }
+
+    //Implements the required cost logic by parsing the annualFee string back into a numerical value.
+    @Override
+    public double getCost() {
+        return Double.parseDouble(annualFee);
+    }
+
+    //Returns 0.0, indicating that license items are tax-exempt within this system's business logic.
+    @Override
+    public double getTax() {
+        return 0.0;
+    }
+
+    //Returns the static string "License" to identify the item type in formatted reports.
+    @Override
+    public String getDetails() {
+        return "License";
+    }
+
+    //Returns the base cost, as there are no additional taxes or fees applied to the displayed total for this item type.
+    @Override
+    public double getDisplayTotal() {
+        return getCost();
+    }
+}
